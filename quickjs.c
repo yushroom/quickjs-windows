@@ -28,7 +28,11 @@
 #include <inttypes.h>
 #include <string.h>
 #include <assert.h>
+#ifndef _WIN32
 #include <sys/time.h>
+#else
+#include "sys/time.h"
+#endif
 #include <time.h>
 #include <fenv.h>
 #include <math.h>
@@ -36,6 +40,10 @@
 #include <malloc/malloc.h>
 #elif defined(__linux__)
 #include <malloc.h>
+#endif
+
+#ifdef _WIN32
+typedef intptr_t ssize_t;
 #endif
 
 #include "cutils.h"

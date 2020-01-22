@@ -28,18 +28,31 @@
 #include <inttypes.h>
 #include <string.h>
 #include <assert.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 #include <errno.h>
 #include <fcntl.h>
+#ifndef _WIN32
 #include <sys/time.h>
+#else
+#include "sys/time.h"
+#endif
 #include <time.h>
 #include <signal.h>
 #include <limits.h>
 #include <sys/stat.h>
+#ifndef _WIN32
 #include <dirent.h>
+#endif
 #if defined(_WIN32)
 #include <windows.h>
 #include <conio.h>
+#include <io.h>
+#define PATH_MAX MAX_PATH
+typedef intptr_t ssize_t;
+#define popen _popen
+#define pclose _pclose
 #else
 #include <dlfcn.h>
 #include <termios.h>
