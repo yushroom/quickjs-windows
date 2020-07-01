@@ -31,11 +31,21 @@
 /* set if CPU is big endian */
 #undef WORDS_BIGENDIAN
 
+#if defined(__GNUC__) || defined(__clang__)
 #define likely(x)       __builtin_expect(!!(x), 1)
 #define unlikely(x)     __builtin_expect(!!(x), 0)
 #define force_inline inline __attribute__((always_inline))
 #define no_inline __attribute__((noinline))
 #define __maybe_unused __attribute__((unused))
+#define __js_printf_like(f, a)   __attribute__((format(printf, f, a)))
+#else
+#define likely(x)		(x)
+#define unlikely(x)		(x)
+#define force_inline	inline
+#define no_inline
+#define __maybe_unused
+#define __js_printf_like(a, b)
+#endif
 
 #define xglue(x, y) x ## y
 #define glue(x, y) xglue(x, y)
@@ -111,6 +121,55 @@ static inline int64_t min_int64(int64_t a, int64_t b)
         return b;
 }
 
+#if defined(__GNUC__) || defined(__clang__)
+#else
+#include <intrin.h>
+
+static inline int __builtin_ctz(unsigned x) {
+	unsigned long ret;
+	_BitScanForward(&ret, x);
+	return (int)ret;
+}
+
+static inline int __builtin_ctzll(unsigned long long x) {
+	unsigned long ret;
+	_BitScanForward64(&ret, x);
+	return (int)ret;
+}
+
+static inline int __builtin_ctzl(unsigned long x) {
+	return sizeof(x) == 8 ? __builtin_ctzll(x) : __builtin_ctz((uint32_t)x);
+}
+
+static inline int __builtin_clz(unsigned x) {
+	//unsigned long ret;
+	//_BitScanReverse(&ret, x);
+	//return (int)(31 ^ ret);
+	return (int)__lzcnt(x);
+}
+
+static inline int __builtin_clzll(unsigned long long x) {
+	//unsigned long ret;
+	//_BitScanReverse64(&ret, x);
+	//return (int)(63 ^ ret);
+	return (int)__lzcnt64(x);
+}
+
+static inline int __builtin_clzl(unsigned long x) {
+	return sizeof(x) == 8 ? __builtin_clzll(x) : __builtin_clz((uint32_t)x);
+}
+
+#ifdef __cplusplus
+static inline int __builtin_ctzl(unsigned long long x) {
+	return __builtin_ctzll(x);
+}
+
+static inline int __builtin_clzl(unsigned long long x) {
+	return __builtin_clzll(x);
+}
+#endif
+#endif
+
 /* WARNING: undefined if a = 0 */
 static inline int clz32(unsigned int a)
 {
@@ -135,6 +194,7 @@ static inline int ctz64(uint64_t a)
     return __builtin_ctzll(a);
 }
 
+#if defined(__GNUC__) || defined(__clang__)
 struct __attribute__((packed)) packed_u64 {
     uint64_t v;
 };
@@ -146,6 +206,21 @@ struct __attribute__((packed)) packed_u32 {
 struct __attribute__((packed)) packed_u16 {
     uint16_t v;
 };
+#else
+#pragma pack(push,1)
+struct packed_u64 {
+	uint64_t v;
+};
+
+struct packed_u32 {
+	uint32_t v;
+};
+
+struct packed_u16 {
+	uint16_t v;
+};
+#pragma pack(pop)
+#endif
 
 static inline uint64_t get_u64(const uint8_t *tab)
 {
@@ -262,8 +337,7 @@ static inline int dbuf_put_u64(DynBuf *s, uint64_t val)
 {
     return dbuf_put(s, (uint8_t *)&val, 8);
 }
-int __attribute__((format(printf, 2, 3))) dbuf_printf(DynBuf *s,
-                                                      const char *fmt, ...);
+int __js_printf_like(2, 3) dbuf_printf(DynBuf *s, const char *fmt, ...);
 void dbuf_free(DynBuf *s);
 static inline BOOL dbuf_error(DynBuf *s) {
     return s->error;
