@@ -61,6 +61,9 @@ static int js_fib_init(JSContext *ctx, JSModuleDef *m)
 #define JS_INIT_MODULE js_init_module_fib
 #endif
 
+#if (defined _WIN32) && (defined JS_SHARED_LIBRARY)
+__declspec(dllexport)
+#endif
 JSModuleDef *JS_INIT_MODULE(JSContext *ctx, const char *module_name)
 {
     JSModuleDef *m;

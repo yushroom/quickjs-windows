@@ -42,7 +42,7 @@
 #define likely(x)		(x)
 #define unlikely(x)		(x)
 #define force_inline	inline
-#define no_inline
+#define no_inline		__declspec(noinline)
 #define __maybe_unused
 #define __js_printf_like(a, b)
 #endif

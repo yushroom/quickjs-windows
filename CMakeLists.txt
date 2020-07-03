@@ -27,6 +27,9 @@ target_compile_definitions(quickjs PUBLIC _GNU_SOURCE)
 target_compile_features(quickjs PUBLIC c_std_11)
 
 if (WIN32)
+	target_sources(quickjs PRIVATE
+		${QUICKJS_ROOT_DIR}/sys/time.h
+		${QUICKJS_ROOT_DIR}/gettimeofday.c)
     target_compile_definitions(quickjs PUBLIC _CRT_SECURE_NO_WARNINGS EMSCRIPTEN)
 endif()
 

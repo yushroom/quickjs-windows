@@ -46,6 +46,7 @@
 #include <dirent.h>
 #endif
 #if defined(_WIN32)
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <conio.h>
 #include <io.h>
@@ -410,8 +411,51 @@ typedef JSModuleDef *(JSInitModuleFunc)(JSContext *ctx,
 static JSModuleDef *js_module_loader_so(JSContext *ctx,
                                         const char *module_name)
 {
-    JS_ThrowReferenceError(ctx, "shared library modules are not supported yet");
-    return NULL;
+    JSModuleDef *m;
+    HINSTANCE hd;
+    JSInitModuleFunc *init;
+    char *filename;
+
+    if (!strchr(module_name, '/')) {
+        /* must add a '/' so that the DLL is not searched in the
+           system library paths */
+        filename = js_malloc(ctx, strlen(module_name) + 2 + 1);
+        if (!filename)
+            return NULL;
+        strcpy(filename, "./");
+        strcpy(filename + 2, module_name);
+    }
+    else {
+        filename = (char *)module_name;
+    }
+
+    /* C module */
+    hd = LoadLibrary(filename);
+    if (filename != module_name)
+        js_free(ctx, filename);
+    if (!hd) {
+        JS_ThrowReferenceError(ctx, "could not load module filename '%s' as shared library",
+            module_name);
+        goto fail;
+    }
+
+    init = GetProcAddress(hd, "js_init_module");
+    if (!init) {
+        JS_ThrowReferenceError(ctx, "could not load module filename '%s': js_init_module not found",
+            module_name);
+        goto fail;
+    }
+
+    m = init(ctx, module_name);
+    if (!m) {
+        JS_ThrowReferenceError(ctx, "could not load module filename '%s': initialization error",
+            module_name);
+    fail:
+        if (hd)
+            FreeLibrary(hd);
+        return NULL;
+    }
+    return m;
 }
 #else
 static JSModuleDef *js_module_loader_so(JSContext *ctx,

@@ -140,6 +140,9 @@ static int js_point_init(JSContext *ctx, JSModuleDef *m)
     return 0;
 }
 
+#if defined(_WIN32)
+__declspec(dllexport)
+#endif
 JSModuleDef *js_init_module(JSContext *ctx, const char *module_name)
 {
     JSModuleDef *m;
