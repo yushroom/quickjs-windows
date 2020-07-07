@@ -28,7 +28,12 @@
 #include <inttypes.h>
 #include <string.h>
 #include <assert.h>
+#if !defined(_WIN32)
 #include <sys/time.h>
+#else
+#include "sys_time.h"
+typedef intptr_t ssize_t;
+#endif
 #include <time.h>
 #include <fenv.h>
 #include <math.h>

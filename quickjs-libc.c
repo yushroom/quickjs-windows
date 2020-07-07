@@ -28,19 +28,33 @@
 #include <inttypes.h>
 #include <string.h>
 #include <assert.h>
+#if !defined(_WIN32)
 #include <unistd.h>
+#endif
 #include <errno.h>
 #include <fcntl.h>
+#if !defined(_WIN32)
 #include <sys/time.h>
+#else
+#include "sys_time.h"
+#endif
 #include <time.h>
 #include <signal.h>
 #include <limits.h>
 #include <sys/stat.h>
+#if !defined(_WIN32)
 #include <dirent.h>
+#endif
 #if defined(_WIN32)
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <conio.h>
-#include <utime.h>
+#include <sys/utime.h>
+#include <io.h>
+#define PATH_MAX MAX_PATH
+typedef intptr_t ssize_t;
+#define popen _popen
+#define pclose _pclose
 #else
 #include <dlfcn.h>
 #include <termios.h>
@@ -2310,6 +2324,7 @@ static JSValue js_os_mkdir(JSContext *ctx, JSValueConst this_val,
     return JS_NewInt32(ctx, ret);
 }
 
+#if !defined(_WIN32)
 /* return [array, errorcode] */
 static JSValue js_os_readdir(JSContext *ctx, JSValueConst this_val,
                              int argc, JSValueConst *argv)
@@ -2353,6 +2368,7 @@ static JSValue js_os_readdir(JSContext *ctx, JSValueConst this_val,
  done:
     return make_obj_error(ctx, obj, err);
 }
+#endif
 
 #if !defined(_WIN32)
 static int64_t timespec_to_ms(const struct timespec *tv)
@@ -3479,13 +3495,19 @@ static const JSCFunctionListEntry js_os_funcs[] = {
     JS_CFUNC_DEF("getcwd", 0, js_os_getcwd ),
     JS_CFUNC_DEF("chdir", 0, js_os_chdir ),
     JS_CFUNC_DEF("mkdir", 1, js_os_mkdir ),
+#if !defined(_WIN32)
     JS_CFUNC_DEF("readdir", 1, js_os_readdir ),
+#endif
     /* st_mode constants */
     OS_FLAG(S_IFMT),
+#if !defined(_WIN32)
     OS_FLAG(S_IFIFO),
+#endif
     OS_FLAG(S_IFCHR),
     OS_FLAG(S_IFDIR),
+#if !defined(_WIN32)
     OS_FLAG(S_IFBLK),
+#endif
     OS_FLAG(S_IFREG),
 #if !defined(_WIN32)
     OS_FLAG(S_IFSOCK),

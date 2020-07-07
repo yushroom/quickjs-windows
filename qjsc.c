@@ -27,7 +27,11 @@
 #include <inttypes.h>
 #include <string.h>
 #include <assert.h>
+#if !defined(_WIN32)
 #include <unistd.h>
+#else
+#include "getopt.h"
+#endif
 #include <errno.h>
 #if !defined(_WIN32)
 #include <sys/wait.h>
