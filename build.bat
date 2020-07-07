@@ -1,5 +1,5 @@
 rem @echo off
-set clang=D:\library\LLVM10\bin\clang-cl.exe /MD /O2 /Ob2 /Ot -D_CRT_NONSTDC_NO_WARNINGS -DCONFIG_VERSION=\"2020-04-12\" -D_CRT_SECURE_NO_WARNINGS
+set clang=D:\library\LLVM10\bin\clang-cl.exe /MD /O2 /Ob2 /Ot -D_CRT_NONSTDC_NO_WARNINGS -DCONFIG_VERSION=\"2020-07-05\" -D_CRT_SECURE_NO_WARNINGS
 %clang% -c libbf.c -o libbf.o
 %clang% -c libregexp.c -o libregexp.o
 %clang% -c libunicode.c -o libunicode.o

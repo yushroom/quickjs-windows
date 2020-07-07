@@ -136,7 +136,7 @@ static inline size_t js_trace_malloc_usable_size(void *ptr)
 #endif
 }
 
-static void __attribute__((format(printf, 2, 3)))
+static void __js_printf_like(2, 3)
     js_trace_malloc_printf(JSMallocState *s, const char *fmt, ...)
 {
     va_list ap;
